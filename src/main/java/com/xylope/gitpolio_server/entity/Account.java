@@ -2,6 +2,7 @@ package com.xylope.gitpolio_server.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
@@ -11,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
+@Getter
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
