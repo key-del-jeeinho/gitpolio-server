@@ -28,7 +28,6 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
-
     // https://mvnrepository.com/artifact/com.thedeanda/lorem
     testImplementation group: 'com.thedeanda', name: 'lorem', version: '2.1'
 }
