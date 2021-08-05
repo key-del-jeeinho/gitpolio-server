@@ -7,11 +7,9 @@ import com.xylope.gitpolio_server.exception.LoginFailureException;
 import com.xylope.gitpolio_server.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-@RestController
+@RestController @RequestMapping("/api/v1/account")
 @RequiredArgsConstructor
 public class AccountController {
     private final AccountRepository accountRepository;
@@ -21,15 +19,19 @@ public class AccountController {
         boolean isExist = accountRepository.existsById(account.getEmail());
         if(isExist) throw new AccountAlreadyExistException(account.getEmail());
 
-        accountRepository.save(new Account(account.getName(), account.getEmail(), account.getPassword()));
+        accountRepository.save(Account.builder()
+                .name(account.getName())
+                .email(account.getEmail())
+                .password(account.getPassword())
+                .build());
     }
 
-    @PostMapping
-    public ResponseEntity<AccountDto> login(@RequestParam String email, @RequestParam String password) {
-        if(!accountRepository.existsById(email)) throw new LoginFailureException();
-
+    @PostMapping("/login")
+    public ResponseEntity<AccountDto> login(@RequestBody String email, @RequestBody String password) {
         Account account = accountRepository.getById(email);
-        if(!account.getPassword().equals(password)) throw new LoginFailureException();
+        //TODO 지인호 | 나중에 FailureReason Enum 작성 후 OR 연산자 분할 | 2021.08.05
+        if(!accountRepository.existsById(email) ||
+                !account.getPassword().equals(password)) throw new LoginFailureException();
 
         return ResponseEntity.ok(AccountDto.builder()
                 .name(account.getName())

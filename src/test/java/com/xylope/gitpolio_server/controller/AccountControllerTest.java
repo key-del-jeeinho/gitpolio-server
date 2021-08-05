@@ -34,6 +34,8 @@ public class AccountControllerTest {
 
         accountController.signUp(account);
 
+        //TODO 지인호 | 20210805
+        // save 에서 Account 를 equals 메서드 이외의 방식으로 검증할 수 있는지 고민해보기
         verify(accountRepository).save(new Account(account.getName(), account.getEmail(), account.getPassword()));
     }
 

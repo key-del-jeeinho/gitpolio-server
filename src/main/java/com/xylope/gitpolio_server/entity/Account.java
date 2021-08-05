@@ -1,9 +1,6 @@
 package com.xylope.gitpolio_server.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.Entity;
@@ -11,9 +8,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+@Builder
 @Entity
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode //TODO 지인호 | 추후 제거 | 20210805
 @AllArgsConstructor
 @NoArgsConstructor
 public class Account {
