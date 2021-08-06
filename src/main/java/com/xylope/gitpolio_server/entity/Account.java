@@ -11,7 +11,6 @@ import javax.persistence.Id;
 @Builder
 @Entity
 @Getter
-@EqualsAndHashCode //TODO 지인호 | 추후 제거 | 20210805
 @AllArgsConstructor
 @NoArgsConstructor
 public class Account {
