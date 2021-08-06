@@ -28,10 +28,9 @@ public class AccountController {
 
     @PostMapping("/login")
     public ResponseEntity<AccountDto> login(@RequestBody String email, @RequestBody String password) {
+        if(!accountRepository.existsById(email)) throw new LoginFailureException(LoginFailureException.Reason.ID_NOT_FOUND);
         Account account = accountRepository.getById(email);
-        //TODO 지인호 | 나중에 FailureReason Enum 작성 후 OR 연산자 분할 | 2021.08.05
-        if(!accountRepository.existsById(email) ||
-                !account.getPassword().equals(password)) throw new LoginFailureException();
+        if(!account.getPassword().equals(password)) throw new LoginFailureException(LoginFailureException.Reason.WRONG_PASSWORD);
 
         return ResponseEntity.ok(AccountDto.builder()
                 .name(account.getName())
