@@ -9,6 +9,7 @@ import com.xylope.gitpolio_server.repository.AccountRepository;
 import com.xylope.gitpolio_server.service.AccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -18,27 +19,30 @@ import static org.mockito.Mockito.when;
 
 public class AccountServiceTest {
     private LoremIpsum lorem;
-    private AccountService accountService;
+    private PasswordEncoder passwordEncoder;
     private AccountRepository accountRepository;
+    private AccountService accountService;
 
     @BeforeEach
     public void init() {
         lorem = LoremIpsum.getInstance();
+        passwordEncoder = mock(PasswordEncoder.class);
         accountRepository = mock(AccountRepository.class);
-        accountService = new AccountService(accountRepository);
+        accountService = new AccountService(passwordEncoder, accountRepository);
     }
 
     @Test
     public void testSignUp() {
         AccountDto account = getRandomAccount();
 
+        when(passwordEncoder.encode(account.getPassword())).thenReturn(account.getPassword().repeat(3));
         when(accountRepository.existsById(account.getEmail())).thenReturn(false);
         when(accountRepository.save(any())).thenAnswer(invocation -> {
             Account target = invocation.getArgument(0);
 
             assertEquals(account.getName(), target.getName());
             assertEquals(account.getEmail(), target.getEmail());
-            assertEquals(account.getPassword(), target.getPassword());
+            assertEquals(passwordEncoder.encode(account.getPassword()), target.getPassword());
             return null;
         });
 
@@ -70,6 +74,7 @@ public class AccountServiceTest {
     public void testLogin() {
         AccountDto account = getRandomAccount();
 
+        when(passwordEncoder.matches(account.getPassword(), account.getPassword())).thenReturn(true);
         when(accountRepository.existsById(account.getEmail())).thenReturn(true);
         when(accountRepository.getById(account.getEmail()))
                 .thenReturn(new Account(account.getName(), account.getEmail(), account.getPassword()));
@@ -84,17 +89,26 @@ public class AccountServiceTest {
 
         when(accountRepository.existsById(account.getEmail())).thenReturn(false);
 
-        assertThrows(LoginFailureException.class, () -> accountService.login(account.getEmail(), account.getPassword()));
+        LoginFailureException.Reason reason =
+                assertThrows(LoginFailureException.class, () -> accountService.login(account.getEmail(), account.getPassword()))
+                .getReason();
+        assertEquals(reason, LoginFailureException.Reason.ID_NOT_FOUND);
     }
 
     @Test
     public void testLoginFailure2() {
         AccountDto account = getRandomAccount();
 
+        when(passwordEncoder.matches(account.getPassword(), account.getPassword())).thenReturn(false);
         when(accountRepository.existsById(account.getEmail())).thenReturn(true);
         when(accountRepository.getById(account.getEmail()))
-                .thenReturn(new Account(account.getName(), account.getEmail(), account.getPassword() + "_"));
+                .thenReturn(new Account(account.getName(), account.getEmail(),
+                        account.getPassword()));
 
-        assertThrows(LoginFailureException.class, () -> accountService.login(account.getEmail(), account.getPassword()));
+        LoginFailureException.Reason reason =
+                assertThrows(LoginFailureException.class, () -> accountService.login(account.getEmail(), account.getPassword()))
+                        .getReason();
+
+        assertEquals(reason, LoginFailureException.Reason.WRONG_PASSWORD);
     }
 }
